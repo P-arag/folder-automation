@@ -1,21 +1,22 @@
 import os
+import json
 import time
+from pprint import pprint
 from watchdog.observers import Observer
 from watchdog.events import FileSystemEventHandler
-
-DIR = "/home/pallav/Downloads/"
+from utils import *
 
 
 class OnMyWatch:
-    watchDirectory = DIR
-
-    def __init__(self):
+    def __init__(self, watch_directory):
         self.observer = Observer()
+        self.watch_directory = os.path.expanduser(watch_directory)
+        print(f"WatchDog Watching {self.watch_directory}")
 
     def run(self):
         event_handler = Handler()
         self.observer.schedule(
-            event_handler, self.watchDirectory, recursive=True)
+            event_handler, self.watch_directory, recursive=True)
         self.observer.start()
         try:
             while True:
@@ -27,116 +28,25 @@ class OnMyWatch:
         self.observer.join()
 
 
-def check_if_already_there(file_path, dest_dir):
-    dest_dir = "/home/pallav/"+dest_dir
-    fileNum = 1
-    fileName = file_path.split("/")[-1]
-    print(dest_dir+"/"+fileName)
-    if os.path.exists(dest_dir+"/"+fileName):
-
-        while True:
-            if os.path.exists(f"{dest_dir}/{fileName}({fileNum})"):
-                fileNum += 1
-                print("Exists")
-            else:
-                fileNameArr = fileName.split(".")
-                fileNameWithoutExten = fileNameArr[0]
-                fileExten = fileNameArr[1]
-                return f"{fileNameWithoutExten}{fileNum}.{fileExten}"
-    else:
-        return fileName
-
-
-def commands(file_path, where):
-    command_copy = "cp " + file_path + " " + "/home/pallav/" + where
-    command_delete = "rm " + file_path
-    return [command_copy, command_delete]
-
-
 class Handler(FileSystemEventHandler):
-
     @staticmethod
     def on_any_event(event):
         if event.is_directory:
             return None
-
         elif event.event_type == 'created':
-            print("Watchdog received created event - % s." % event.src_path)
-
-            if event.src_path.endswith(("jpg", "jpeg", "png", "gif")):
-                print("Image Detected")
-                time.sleep(2)
-                fileName = check_if_already_there(event.src_path, "Pictures")
-                print(fileName)
-                os.rename(event.src_path, DIR+fileName)
-                myCommands = commands(DIR+fileName, "Pictures")
-                os.system(myCommands[0])
-                os.system(myCommands[1])
-
-            elif event.src_path.endswith(("docx", "txt", "pdf")):
-                print("Document Detected")
-                time.sleep(2)
-                fileName = check_if_already_there(event.src_path, "Documents")
-                print(fileName)
-                os.rename(event.src_path, DIR+fileName)
-                myCommands = commands(DIR+fileName, "Documents")
-                os.system(myCommands[0])
-                os.system(myCommands[1])
-
-            elif event.src_path.endswith(("mp3", "wav")):
-                print("Audio Detected")
-                time.sleep(2)
-                fileName = check_if_already_there(event.src_path, "Music")
-                print(fileName)
-                os.rename(event.src_path, DIR+fileName)
-                myCommands = commands(DIR+fileName, "Music")
-                os.system(myCommands[0])
-                os.system(myCommands[1])
-
-            elif event.src_path.endswith(("mp4", "avi", "mpv", "ogg")):
-                print("Video Detected")
-                time.sleep(2)
-                fileName = check_if_already_there(event.src_path, "Videos")
-                print(fileName)
-                os.rename(event.src_path, DIR+fileName)
-                myCommands = commands(DIR+fileName, "Videos")
-                os.system(myCommands[0])
-                os.system(myCommands[1])
-
-            elif event.src_path.endswith(("py", "json", "js", "c", "cs", "cpp", "java", "go")):
-                print("Code Detected")
-                time.sleep(2)
-                fileName = check_if_already_there(event.src_path, "Code")
-                print(fileName)
-                os.rename(event.src_path, DIR+fileName)
-                myCommands = commands(DIR+fileName, "Code")
-                os.system(myCommands[0])
-                os.system(myCommands[1])
-
-            elif event.src_path.endswith(("zip")):
-                print("Folders Detected")
-                time.sleep(100)
-                fileName = check_if_already_there(event.src_path, "Public")
-                print(fileName)
-                os.rename(event.src_path, DIR+fileName)
-                myCommands = commands(DIR+fileName, "Public")
-                os.system(myCommands[0])
-                os.system(myCommands[1])
-            elif event.src_path.endswith(("tar", "gz", "tar.gz", "deb")):
-                print("Large Files Detected, Not Doing anything")
-
-            else:
-                print("Unknown Files Detected")
-                print(fileName)
-                os.rename(event.src_path, DIR+fileName)
-                time.sleep(20)
-                fileName = check_if_already_there(event.src_path, "Etc")
-                myCommands = commands(DIR+fileName, "Etc")
-                os.system(myCommands[0])
-                os.system(myCommands[1])
+            for folder_iterable in data["move_folders"]:
+                extensions = ["." + extension for extension in folder_iterable["Xtensions"]]
+                if event.src_path.endswith(tuple(extensions)):
+                    print(folder_iterable["print_text"])
+                    if folder_iterable["move_this_file?"]:
+                        move_file(event.src_path, folder_iterable["location"])
+                        print("moved")
+                    else:
+                        print(folder_iterable["print_text"])
+                    break
 
 
 if __name__ == '__main__':
-    watch = OnMyWatch()
-    print(f"Watchdog watching {DIR}")
+    data = json.load(open("./config.json"))
+    watch = OnMyWatch(data["watch_directory"])
     watch.run()

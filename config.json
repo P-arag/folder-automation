@@ -1,0 +1,54 @@
+{
+  "watch_directory": "~/Downloads",
+  "move_folders": [
+    {
+      "location": "~/Pictures",
+      "print_text": "Images Detected",
+      "Xtensions": ["jpg", "jpeg", "png", "gif"],
+      "sleep": 2,
+      "move_this_file?": true
+    },
+    {
+      "location": "~/Documents",
+      "print_text": "Document Detected",
+      "Xtensions": ["docx", "txt", "pdf"],
+      "sleep": 2,
+      "move_this_file?": true
+    },
+    {
+      "location": "~/Music",
+      "print_text": "Audio files detected",
+      "Xtensions": ["mp3", "wav"],
+      "sleep": 2,
+      "move_this_file?": true
+    },
+    {
+      "location": "~/Videos",
+      "print_text": "Videos Detected",
+      "Xtensions": ["mp4", "avi", "mpv", "ogg"],
+      "sleep": 2,
+      "move_this_file?": true
+    },
+    {
+      "location": "~/Code",
+      "print_text": "Program Files Detected",
+      "Xtensions": ["py", "json", "js", "c", "cs", "cpp", "java", "go"],
+      "sleep": 2,
+      "move_this_file?": true
+    },
+    {
+      "location": "~/Public",
+      "print_text": "Zip files detected",
+      "Xtensions": ["zip"],
+      "sleep": 100,
+      "move_this_file?": true
+    },
+    {
+      "location": "...",
+      "print_text": "Large files detected, not doing anything",
+      "Xtensions": ["tar", "gz", "tar.gz", "deb"],
+      "sleep": 0,
+      "move_this_file?": false
+    }
+  ]
+}

@@ -31,19 +31,26 @@ class OnMyWatch:
 class Handler(FileSystemEventHandler):
     @staticmethod
     def on_any_event(event):
+        print(event.event_type+" "+event.src_path)
+
         if event.is_directory:
             return None
         elif event.event_type == 'created':
+            print("*created "+event.src_path)
             for folder_iterable in data["move_folders"]:
                 extensions = ["." + extension for extension in folder_iterable["Xtensions"]]
                 if event.src_path.endswith(tuple(extensions)):
                     print(folder_iterable["print_text"])
                     if folder_iterable["move_this_file?"]:
+                        time.sleep(folder_iterable["sleep"])
                         move_file(event.src_path, folder_iterable["location"])
                         print("moved")
+                        print(os.listdir(os.path.expanduser(folder_iterable["location"])))
+                        break
                     else:
                         print(folder_iterable["print_text"])
-                    break
+                        break
+
 
 
 if __name__ == '__main__':
